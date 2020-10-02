@@ -13,4 +13,92 @@ output:
 knitr::opts_chunk$set(echo = TRUE, cache = TRUE)
 ```
 
+# Optimizing Capital Bikeshare Product Distribution
+##### An Analysis by Andrew Bubnar
+
+## Overview
+
+```{r }
+
+```
+
+
+## Data Selection, Description and Summary
+
+```{r }
+
+```
+
+
+#### Data Sourcing
+
+```{r }
+
+```
+
+
+#### Data Head & Codebook
+
+```{r }
+
+```
+
+
+#### Data Structure
+
+```{r }
+
+```
+
+
+#### Data Missingness
+
+```{r }
+
+```
+
+
+#### Two Options for Analysis
+
+```{r }
+
+```
+
+
+## Data Processing
+
+```{r }
+
+```
+
+
+## Modeling
+
+
+
+```{r }
+
+
+```
+
+## Final Model and Justification
+
+
+```{r }
+
+```
+
+## Interpretation and Conclusion
+
+
+```{r }
+
+```
+
+## Source
+
+
+
+
+
 
