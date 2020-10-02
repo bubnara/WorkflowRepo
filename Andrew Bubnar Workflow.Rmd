@@ -26,77 +26,83 @@ The purpose of this analysis is, firstly, to deduce what factors impact the outc
 if(require(pacman)==FALSE)
   install.packages("pacman")
 
-pacman::p_load(tidyverse, hexbin, dplyr, DT, ggplot2, caret, corrplot, knitr)
+pacman::p_load(tidyverse, gtsummary, dplyr, DT, ggplot2, caret, corrplot, knitr)
 
 ```
 
-```{r }
-
-```
 
 
 ## Data Selection, Description and Summary
 
-```{r }
-
-```
-
 
 #### Data Sourcing
 
-```{r }
 
-```
+The data involved was produced in conjunction by Capital Bikeshare and freemeteo.com. Two datasets were provided for analyses, differing on how they aggregate over time. One dataset has hourly data for ten independent variables with three dependent variables, while the other aggregates this same data by day. A data head, as well as a descriptive table defining each variable, can be found below:
+
 
 
 #### Data Head & Codebook
 
-```{r }
+```{r, echo = FALSE }
+library(DT)
+# Read in Data
+daily = read.csv("day.csv")
+hourly = read.csv("hour.csv")
+head(hourly)
 
+#Split data into training and validation sets
+set.seed(42)
+dailytrainindex = sample(1:nrow(daily), size = round(0.7*nrow(daily)), replace = FALSE)
+daily.train = daily[dailytrainindex,]
+daily.validation = daily[-dailytrainindex,]
+hourlytrainindex = sample(1:nrow(hourly), size = round(0.7*nrow(daily)), replace = FALSE)
+hourly.train = hourly[hourlytrainindex,]
+hourly.validation = hourly[-hourlytrainindex,]
+
+# Create data frame that holds descriptions
+desc = as.data.frame(c('Observation #','Date','Season (1 = Spring, 2=Summer, etc.)','Year (0 = 2011, 1 = 2012)','Month (numeric)','Hour (0 = 12:00 am - 12:59 am, 23 = 11:00pm - 11:59 pm)','Public Holiday (Base 0 = no)', 'Day of Week (Sunday = 0)', 'Work Day (non-holiday, weekday)', 'Weather Condition (1 = Clear/Parly Cloudy, 2 = Mist/Cloudy, 3 = Light Snow/Rain, 4 = Heavy Rain/Snow/Thunderstorm','True Temperature (Normalized)','Feels Like Temperature (Normalized)','Windspeed (Normalized)','Humidity','Count of Unregistered Users','Count of Registered Users','Total Count of Users'),colnames(hourly), colnames='')
 ```
 
+```{r }
+# Display a Data Table to Display Descriptions
+DT::datatable(desc, colnames="")
+```
 
 #### Data Structure
 
-```{r }
-
-```
-
+The columns are comprised of a primary key for each observation, the date, 12 predictor variables and three response variables. The three response variables are the amount of casual riders, the amount of registered riders, and the sum of these, total riders. 
 
 #### Data Missingness
 
+There is no missing data in the dataset, which provides some ease in the next step, Data Processing
+
 ```{r }
+# Count missing data for each column
+missing = as.data.frame(sapply(hourly, function(x) sum(is.na(x))))
+DT::datatable(missing, colnames =c('Variable', 'Count of Missing'))
+
 
 ```
 
 
-#### Two Options for Analysis
+#### Two Routes of Analysis
 
-```{r }
+As mentioned, there are two datasets involved in this analysis. The only difference between the two datasets is the presence of the 'hour' variable. This inherently creates 24 times the observations in the hourly dataset. I will use both datasets.
+
+## Data Preparation
+
+
+
+```{r  }
+
 
 ```
-
-
-## Data Processing
-
-```{r }
-
-```
-
 
 ## Modeling
 
+```{r  }
 
-
-```{r }
-
-
-```
-
-## Final Model and Justification
-
-
-```{r }
 
 ```
 

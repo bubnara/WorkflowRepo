@@ -15,3 +15,6 @@ lattice
 caret
 corrplot
 knitr
+nlme
+broom
+gtsummary
