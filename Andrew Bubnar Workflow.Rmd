@@ -205,9 +205,20 @@ library(forecast)
 p.daily = predict(model, newdata=daily.validation)
 modelacc = accuracy(p.daily, daily.validation$cnt)
 RMSE = modelacc[2]
+```
 
+After building many models that considered all the variables available, as well as interactive and multiplicative variables, the final two models that will be presented to Capital Bikeshare are as follows:
+
+* A simple linear regression model that predicts average user by time
+* A multiple linear regression model that predicts the average users per day based on a combination of conditions
+
+
+The summary statistics for the models as a whole are:
+
+```{r  }
 # Create Data Tables to Display Summary Stats
 DT::datatable(as.data.frame(glance(hourmodel)[1:6]))
+
 DT::datatable(as.data.frame(glance(model)[1:6],RMSE))
 
 ```
@@ -226,24 +237,25 @@ statdf = as.data.frame(hourmodel$coefficients)
 Below you can see the the impact of hour of the day independent from other variables:
 
 ```{r  }
+# Plot displays impact of hour of the day on users
 ggplot(data = statdf, mapping = aes(x = seq(1,length(hourmodel$coefficients)), y = hourmodel$coefficients)) + geom_bar(position = "dodge", stat = "identity")+ xlab("Hour of Day") + ylab ("Coefficient") + ggtitle("Impact of Hour of Day on Users")
 ```
 
 #### Justification
 
-The two models created above together hold extensive power in predicting when Capital Bikeshare should be deploying their bikes for optimal use and warehousing. 
+The two models created above, when used together, hold extensive power in deciding when Capital Bikeshare should be deploying their bikes for optimal use and warehousing. 
 
 The first model, which is a simple linear regression that predicts users by hour, has a model r-squared of ~.5 and a p-value of 0. This concluded that 50% `YES! 50%` of the variation in users can be attributed to the hour of the day. This is somewhat intuitive, as more people would use the service during the day than at night, but regardless, one variable predicting 50% variation is incredible! The graph above displays clearly, there are times of the day with substantial variation hour to hour. Specifically, between 1 am and 2 am, and between 6 am and 7 am, there is an great decrease, and a great increase in riders. We will touch on this later.
 
-The second model, which uses a multiple linear regression format, maintains an adjusted r-squared value of ~.816
+The second model, which uses a multiple linear regression format, maintains an adjusted r-squared value of ~.816 and an RMSE value of ~730. This means that 81.6% of the variation in bike use can be attributed to the predictive factors in the model, and that on average, each day, the model misses bike use by ~730 users. This may seem like a big number, but when put into the terms of over 4500 users per day, and a 50% chance of predictions being more than ample, there is only an 8% chance that bikes are underutilized in comparison to their potential each day.
 
 
 ## Interpretation and Conclusion
 
-## Source
+My suggestion to Capital BikeShare is twofold:
 
+Firstly, deploy the amount of bikes that the predictive model suggests each day. This will be somewhat routine, as a lot of the variation is seasonal, and thus, staffing hours can be adjusted to accomodate for these seasonal changes. 
 
+Secondly, under `absolutely no circumstances` should each days bikes not be deployed by 7 am, and not be picked up after 1 am. This will ensure that when the morning spike takes place, there will not be a shortage of bikes to start the day. Second, it will ensure that bikes are not idle through the late hours of the night, prone to damage and theft. 
 
-
-
-
+If Capital Bikeshare manages to implement these two suggestions, cost savings and revenue increases will be certain.
