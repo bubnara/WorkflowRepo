@@ -143,17 +143,102 @@ hourly$Day = as.integer(hourly$day)
 
 ## Modeling
 
-```{r  }
+The purpose of this model is to predict bike use on both an hourly and daily basis, and to determine which factors play substantial, scientifically meaningful roles at each level. To do this, I've conducted many predictive linear models that take into account different combinations of predictor variables. Ideally, the most competent model will be one that has the lowest `RMSE`, i.e. average error in predicted bike use for a given time. Another key statistic that I observed was the `coefficient of determination`, which determines the percentage of variation in bike use that is in direct response to changes in the predictors. Maximizing this will also ensure higher quality predictions.
+
+For reference and understanding, I've included summary statistics for each variables simple linear regression model:
+
+
+```{r, echo = FALSE }
+
+#Split data into training and validation sets
+set.seed(42)
+dailytrainindex = sample(1:nrow(daily), size = round(0.7*nrow(daily)), replace = FALSE)
+daily.train = daily[dailytrainindex,]
+daily.validation = daily[-dailytrainindex,]
+hourlytrainindex = sample(1:nrow(hourly), size = round(0.7*nrow(hourly)), replace = FALSE)
+hourly.train = hourly[hourlytrainindex,]
+hourly.validation = hourly[-hourlytrainindex,]
+
+# Create simple linear regression models for each variable, get a simple understanding of usefulness and effects independently of others
+mday = lm(daily.train$cnt~daily.train$day)
+mseason = lm(daily.train$cnt~daily.train$season)
+myear = lm(daily.train$cnt~daily.train$yr)
+mmonth = lm(daily.train$cnt~daily.train$mnth)
+mholiday = lm(daily.train$cnt~daily.train$holiday)
+mweekday = lm(daily.train$cnt~daily.train$weekday)
+mwork = lm(daily.train$cnt~daily.train$workingday)
+mweather = lm(daily.train$cnt~daily.train$weathersit)
+mtemp = lm(daily.train$cnt~daily.train$temp)
+matemp = lm(daily.train$cnt~daily.train$atemp)
+mhum = lm(daily.train$cnt~daily.train$hum)
+mwind = lm(daily.train$cnt~daily.train$windspeed)
+models = list(mday,mseason,myear, mmonth, mholiday,mweekday, mwork, mweather,mtemp, matemp, mhum, mwind)
+
+# Print summary statistics in a table
+library(broom)
+glance = lapply(
+  models, FUN = function(x) glance(x)[1:6]
+  )
+firstglance = lapply(
+  models, FUN = function(x) glance(x)[1:6]
+  )
+glance = as.data.frame(matrix(unlist(glance), nrow = length(unlist(glance[6]))))
+glance = t(glance)
+DT::datatable(glance, colnames = c("R-Squared", "Adj. R-Squared", "Sigma", "T-Stat", "P-Value", "df"), rownames = colnames(daily[1:12]))
 
 
 ```
+
+As you can see, there are some pretty useless independent variables in this dataset, such as "Weekday", "Working Day" and "Holiday". Knowing this made the process of creating my final model much easier.
+
+## Final Model and Justification
+
+```{r, echo = FALSE}
+# Initialize models
+model = lm(cnt~ day + season + weathersit + atemp + hum + windspeed + mnth, data = daily.train)
+hourly.train$hr = as.factor(hourly.train$hr)
+hourly.validation$hr = as.factor(hourly.validation$hr)
+hourmodel = lm(hourly.train$cnt~hourly.train$hr)
+
+# Calculate RMSE for Daily Model (doesn't apply to hourly model, that will just be used to see when to deploy)
+library(forecast)
+p.daily = predict(model, newdata=daily.validation)
+modelacc = accuracy(p.daily, daily.validation$cnt)
+RMSE = modelacc[2]
+
+# Create Data Tables to Display Summary Stats
+DT::datatable(as.data.frame(glance(hourmodel)[1:6]))
+DT::datatable(as.data.frame(glance(model)[1:6],RMSE))
+
+```
+
+And the summary statistics for each individual variable within the models:
+
+```{r, echo = FALSE}
+library(gtsummary)
+tbl_regression(hourmodel)
+tbl_regression(model)
+
+# Create a data frame that holds the coefficients of each hour
+statdf = as.data.frame(hourmodel$coefficients)
+```
+
+Below you can see the the impact of hour of the day independent from other variables:
+
+```{r  }
+ggplot(data = statdf, mapping = aes(x = seq(1,length(hourmodel$coefficients)), y = hourmodel$coefficients)) + geom_bar(position = "dodge", stat = "identity")+ xlab("Hour of Day") + ylab ("Coefficient") + ggtitle("Impact of Hour of Day on Users")
+```
+
+#### Justification
+
+The two models created above together hold extensive power in predicting when Capital Bikeshare should be deploying their bikes for optimal use and warehousing. 
+
+The first model, which is a simple linear regression that predicts users by hour, has a model r-squared of ~.5 and a p-value of 0. This concluded that 50% `YES! 50%` of the variation in users can be attributed to the hour of the day. This is somewhat intuitive, as more people would use the service during the day than at night, but regardless, one variable predicting 50% variation is incredible! The graph above displays clearly, there are times of the day with substantial variation hour to hour. Specifically, between 1 am and 2 am, and between 6 am and 7 am, there is an great decrease, and a great increase in riders. We will touch on this later.
+
+The second model, which uses a multiple linear regression format, maintains an adjusted r-squared value of ~.816
+
 
 ## Interpretation and Conclusion
-
-
-```{r }
-
-```
 
 ## Source
 
